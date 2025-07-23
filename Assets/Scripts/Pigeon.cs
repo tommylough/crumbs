@@ -15,7 +15,7 @@ namespace DefaultNamespace
         [Header("Movement Settings")]
         public float walkSpeed = 2f;
         public float runSpeed = 5f;
-        public float rotationSpeed = 10f;
+        public float rotationSpeed = 10f; // Degrees per second for A/D turning
         public float gravity = -9.81f;
         
         [Header("Input Settings (Player Only)")]
@@ -30,6 +30,10 @@ namespace DefaultNamespace
         [Header("Animation Control")]
         public bool useRandomIdleAnimations = true;
         public float idleAnimationChangeInterval = 3f;
+        
+        [Header("Eating Settings")]
+        [SerializeField] Vector3 beakOffset = new Vector3(0f, 0.2f, 0.4f); // Forward and up from center
+        public float beakEatingDistance = 0.8f;
         
         // Components
         CharacterController characterController;
@@ -203,16 +207,37 @@ namespace DefaultNamespace
         
         void HandlePlayerInput()
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
+            // Don't allow movement input while eating
+            if (isEating)
+            {
+                velocity.y += gravity * Time.deltaTime;
+                characterController.Move(velocity * Time.deltaTime);
+                return;
+            }
+            
+            float horizontal = Input.GetAxis("Horizontal"); // A/D keys for turning
+            float vertical = Input.GetAxis("Vertical");     // W/S keys for forward/back
             bool isRunning = Input.GetKey(runKey);
             bool isFlying = Input.GetKey(flyKey);
             
-            Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
-            
-            if (direction.magnitude >= 0.1f)
+            // Handle rotation (A/D keys)
+            if (Mathf.Abs(horizontal) > 0.1f)
             {
-                MoveInDirection(direction, isRunning);
+                float rotationAmount = horizontal * rotationSpeed * 60f * Time.deltaTime; // Convert to degrees per second
+                transform.Rotate(0, rotationAmount, 0);
+            }
+            
+            // Handle forward/backward movement (W/S keys)
+            if (Mathf.Abs(vertical) > 0.1f)
+            {
+                float currentSpeed = isRunning ? runSpeed : walkSpeed;
+                Vector3 moveDirection = transform.forward * vertical; // Move along facing direction
+                characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
+            }
+            else
+            {
+                // Player is idle - check for nearby food to eat
+                CheckForNearbyFoodToEat();
             }
             
             if (isFlying && isGrounded)
@@ -281,9 +306,9 @@ namespace DefaultNamespace
             {
                 navAgent.SetDestination(targetFood.transform.position);
                 
-                // Check if we reached the food
-                float distanceToFood = Vector3.Distance(transform.position, targetFood.transform.position);
-                if (distanceToFood < 1f)
+                // Check if beak reached the food
+                float distanceToFood = Vector3.Distance(GetBeakPosition(), targetFood.transform.position);
+                if (distanceToFood <= beakEatingDistance)
                 {
                     // Check if other pigeons are competing for same food
                     if (IsCompetitionForFood(targetFood))
@@ -308,9 +333,9 @@ namespace DefaultNamespace
             
             // Move toward food but with competition behavior
             Vector3 foodPosition = targetFood.transform.position;
-            float distanceToFood = Vector3.Distance(transform.position, foodPosition);
+            float distanceToFood = Vector3.Distance(GetBeakPosition(), foodPosition);
             
-            if (distanceToFood < 0.8f)
+            if (distanceToFood <= beakEatingDistance)
             {
                 // We're close enough to compete - do aggressive behavior
                 PerformCompetitiveBehavior();
@@ -359,13 +384,17 @@ namespace DefaultNamespace
         
         void MoveInDirection(Vector3 direction, bool isRunning = false)
         {
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            float angle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, rotationSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            // This method is now only used by AI pigeons
+            // Calculate target rotation using Quaternion
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
             
+            // Smooth rotation for AI pigeons
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            
+            // Move in the direction the pigeon is actually facing
             float currentSpeed = isRunning ? runSpeed : walkSpeed;
-            Vector3 moveDirection = Quaternion.AngleAxis(targetAngle, Vector3.up) * Vector3.forward;
-            characterController.Move(moveDirection.normalized * currentSpeed * Time.deltaTime);
+            Vector3 moveDirection = transform.forward;
+            characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
         }
         
         void LookForFood()
@@ -388,6 +417,55 @@ namespace DefaultNamespace
                         break;
                     }
                 }
+            }
+        }
+        
+        void CheckForNearbyFoodToEat()
+        {
+            // Find nearby food within eating range for player pigeon
+            Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, 1.5f); // Smaller range for eating
+            
+            GameObject closestFood = null;
+            float closestDistance = float.MaxValue;
+            
+            foreach (Collider obj in nearbyObjects)
+            {
+                if (obj.CompareTag("Food"))
+                {
+                    float distance = Vector3.Distance(GetBeakPosition(), obj.transform.position);
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closestFood = obj.gameObject;
+                    }
+                }
+            }
+            
+            // If we found food nearby and beak is close enough, start eating it
+            if (closestFood != null && closestDistance <= beakEatingDistance)
+            {
+                targetFood = closestFood;
+                StartEating();
+            }
+        }
+        
+        Vector3 GetBeakPosition()
+        {
+            // Calculate beak position based on pigeon's rotation and offset
+            return transform.position + transform.TransformDirection(beakOffset);
+        }
+        
+        void FaceFood()
+        {
+            if (targetFood == null) return;
+            
+            Vector3 directionToFood = (targetFood.transform.position - transform.position).normalized;
+            directionToFood.y = 0; // Keep pigeon upright, only rotate on Y axis
+            
+            if (directionToFood != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToFood);
+                transform.rotation = targetRotation; // Instant turn while eating
             }
         }
         
@@ -446,6 +524,10 @@ namespace DefaultNamespace
             ChangeState(PigeonState.Eating);
             isEating = true;
             eatStartTime = Time.time;
+            
+            // Face the food before eating
+            FaceFood();
+            
             SetAnimation("Eat");
             
             if (navAgent.enabled)
@@ -562,10 +644,10 @@ namespace DefaultNamespace
             
             if (isPlayerControlled)
             {
-                float horizontal = Input.GetAxis("Horizontal");
-                float vertical = Input.GetAxis("Vertical");
+                float horizontal = Input.GetAxis("Horizontal"); // A/D turning
+                float vertical = Input.GetAxis("Vertical");     // W/S movement
                 isRunning = Input.GetKey(runKey);
-                isMoving = Mathf.Abs(horizontal) > 0.1f || Mathf.Abs(vertical) > 0.1f;
+                isMoving = Mathf.Abs(vertical) > 0.1f; // Only W/S counts as movement
                 bool isFlying = Input.GetKey(flyKey);
                 
                 if (isFlying || !isGrounded)
@@ -611,9 +693,8 @@ namespace DefaultNamespace
             
             if (isPlayerControlled)
             {
-                float horizontal = Input.GetAxis("Horizontal");
-                float vertical = Input.GetAxis("Vertical");
-                isMoving = Mathf.Abs(horizontal) > 0.1f || Mathf.Abs(vertical) > 0.1f;
+                float vertical = Input.GetAxis("Vertical");     // Only W/S counts as movement
+                isMoving = Mathf.Abs(vertical) > 0.1f;
                 isFlying = Input.GetKey(flyKey) || !isGrounded;
             }
             else

@@ -247,6 +247,9 @@ GameObject:
   - component: {fileID: 509999177018552414}
   - component: {fileID: 509999177018552411}
   - component: {fileID: 509999177018552413}
+  - component: {fileID: 3059613422546250472}
+  - component: {fileID: 6280971696415985339}
+  - component: {fileID: 5335460907300946471}
   m_Layer: 0
   m_Name: Hero
   m_TagString: Untagged
@@ -262,7 +265,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 509999177018552415}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -327,6 +330,80 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!195 &3059613422546250472
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!143 &6280971696415985339
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 0.93
+  m_Radius: 0.26
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!114 &5335460907300946471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e86e445e93b74c6691f2ea6bcba8c527, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isPlayerControlled: 1
+  walkSpeed: 2
+  runSpeed: 5
+  rotationSpeed: 3
+  gravity: -9.81
+  runKey: 304
+  flyKey: 32
+  personality: 4
+  detectionRadius: 5
+  personalityAggressiveness: 0.5
+  useRandomIdleAnimations: 1
+  idleAnimationChangeInterval: 3
+  beakOffset: {x: 0, y: 0.2, z: 0.4}
+  beakEatingDistance: 0.8
+  currentState: 0
 --- !u!1 &509999177448663333
 GameObject:
   m_ObjectHideFlags: 0
