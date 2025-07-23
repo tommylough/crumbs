@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -35,6 +34,9 @@ namespace DefaultNamespace
         [SerializeField] Vector3 beakOffset = new Vector3(0f, 0.2f, 0.4f); // Forward and up from center
         public float beakEatingDistance = 0.8f;
         
+        // System references
+        PigeonEatingSystem eatingSystem;
+        
         // Components
         CharacterController characterController;
         Animator animator;
@@ -46,25 +48,18 @@ namespace DefaultNamespace
         public PigeonState currentState = PigeonState.Wandering;
         GameObject targetFood;
         Vector3 wanderTarget;
-        float lastStateChangeTime;
         float nextWanderTime;
         
         // Competition & Interaction
         List<Pigeon> nearbyPigeons = new List<Pigeon>();
-        bool isEating = false;
+        bool isEating;
         float eatStartTime;
         float eatDuration = 2f;
         
         // Animation state tracking
         string currentAnimation = "";
         float lastIdleChangeTime;
-        int currentIdleIndex = 0;
-        
-        // Animation parameters
-        readonly string SPEED_PARAM = "Speed";
-        readonly string IS_MOVING_PARAM = "IsMoving";
-        readonly string IS_RUNNING_PARAM = "IsRunning";
-        readonly string IS_FLYING_PARAM = "IsFlying";
+        int currentIdleIndex;
         
         List<string> animationList = new List<string> 
         {	"Attack",
@@ -164,9 +159,15 @@ namespace DefaultNamespace
 
         void Start()
         {
+            // Find eating system
+            eatingSystem = FindFirstObjectByType<PigeonEatingSystem>();
+            if (eatingSystem == null)
+            {
+                Debug.LogWarning("PigeonEatingSystem not found in scene!");
+            }
+            
             SetAnimation("Idle_A");
             lastIdleChangeTime = Time.time;
-            lastStateChangeTime = Time.time;
             
             // Initialize AI state
             if (!isPlayerControlled)
@@ -399,20 +400,22 @@ namespace DefaultNamespace
         
         void LookForFood()
         {
-            // Find nearby food within detection radius
-            Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, detectionRadius);
+            if (eatingSystem == null) return;
             
-            foreach (Collider obj in nearbyObjects)
+            // Use eating system to find nearby food
+            List<GameObject> nearbyFood = eatingSystem.GetNearbyFood(transform.position, detectionRadius);
+            
+            foreach (GameObject food in nearbyFood)
             {
-                if (obj.CompareTag("Food")) // Assuming food has "Food" tag
+                if (food != null)
                 {
                     // Found food! Change target if this food is closer or we don't have a target
-                    float distanceToNewFood = Vector3.Distance(transform.position, obj.transform.position);
+                    float distanceToNewFood = Vector3.Distance(transform.position, food.transform.position);
                     
                     if (targetFood == null || 
                         Vector3.Distance(transform.position, targetFood.transform.position) > distanceToNewFood)
                     {
-                        targetFood = obj.gameObject;
+                        targetFood = food;
                         ChangeState(PigeonState.Investigating);
                         break;
                     }
@@ -422,27 +425,29 @@ namespace DefaultNamespace
         
         void CheckForNearbyFoodToEat()
         {
-            // Find nearby food within eating range for player pigeon
-            Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, 1.5f); // Smaller range for eating
+            if (eatingSystem == null) return;
+            
+            // Use eating system to find nearby food within eating range
+            List<GameObject> nearbyFood = eatingSystem.GetNearbyFood(GetBeakPosition(), beakEatingDistance);
             
             GameObject closestFood = null;
             float closestDistance = float.MaxValue;
             
-            foreach (Collider obj in nearbyObjects)
+            foreach (GameObject food in nearbyFood)
             {
-                if (obj.CompareTag("Food"))
+                if (food != null)
                 {
-                    float distance = Vector3.Distance(GetBeakPosition(), obj.transform.position);
+                    float distance = Vector3.Distance(GetBeakPosition(), food.transform.position);
                     if (distance < closestDistance)
                     {
                         closestDistance = distance;
-                        closestFood = obj.gameObject;
+                        closestFood = food;
                     }
                 }
             }
             
             // If we found food nearby and beak is close enough, start eating it
-            if (closestFood != null && closestDistance <= beakEatingDistance)
+            if (closestFood != null)
             {
                 targetFood = closestFood;
                 StartEating();
@@ -485,9 +490,6 @@ namespace DefaultNamespace
         {
             // Play aggressive animation and push others
             SetAnimation("Attack");
-            
-            // Check personality - aggressive pigeons push harder
-            float pushForce = personalityAggressiveness * 2f;
             
             foreach (Pigeon pigeon in nearbyPigeons)
             {
@@ -545,9 +547,13 @@ namespace DefaultNamespace
                     // Finished eating
                     isEating = false;
                     
-                    // Destroy the food
+                    // Notify eating system and destroy the food
                     if (targetFood != null)
                     {
+                        if (eatingSystem != null)
+                        {
+                            eatingSystem.RemoveFoodItem(targetFood);
+                        }
                         Destroy(targetFood);
                         targetFood = null;
                     }
@@ -633,7 +639,6 @@ namespace DefaultNamespace
         void ChangeState(PigeonState newState)
         {
             currentState = newState;
-            lastStateChangeTime = Time.time;
         }
         
         void HandleAnimation()
