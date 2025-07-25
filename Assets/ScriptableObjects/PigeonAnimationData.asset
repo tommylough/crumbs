@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28790cf56a31849399abfac8c9f46105, type: 3}
+  m_Name: PigeonAnimationData
+  m_EditorClassIdentifier: 
+  allAnimations:
+  - Attack
+  - Bounce
+  - Clicked
+  - Death
+  - Eat
+  - Fear
+  - Fly
+  - Hit
+  - Idle_A
+  - Idle_B
+  - Idle_C
+  - Jump
+  - Roll
+  - Run
+  - Sit
+  - Spin/Splash
+  - Swim
+  - Walk
+  allShapeKeys:
+  - Eyes_Annoyed
+  - Eyes_Blink
+  - Eyes_Cry
+  - Eyes_Dead
+  - Eyes_Excited
+  - Eyes_Happy
+  - Eyes_LookDown
+  - Eyes_LookIn
+  - Eyes_LookOut
+  - Eyes_LookUp
+  - Eyes_Rabid
+  - Eyes_Sad
+  - Eyes_Shrink
+  - Eyes_Sleep
+  - Eyes_Spin
+  - Eyes_Squint
+  - Eyes_Trauma
+  - Sweat_L
+  - Sweat_R
+  - Teardrop_L
+  - Teardrop_R
+  idleAnimations:
+  - Idle_A
+  - Idle_B
+  - Idle_C
+  idleAnimationChangeInterval: 3
+  useRandomIdleAnimations: 1
+  walkAnimation: Walk
+  runAnimation: Run
+  flyAnimation: Fly
+  eatAnimation: Eat
+  attackAnimation: Attack
+  debugKeys:
+  - keyCode: 49
+    animationName: Eat
+  - keyCode: 50
+    animationName: Attack
+  - keyCode: 51
+    animationName: Jump
+  - keyCode: 52
+    animationName: Sit
+  - keyCode: 53
+    animationName: Fear
+  debugShapeKeys:
+  - keyCode: 98
+    shapeKeyName: Eyes_Blink
+  - keyCode: 104
+    shapeKeyName: Eyes_Happy
+  - keyCode: 115
+    shapeKeyName: Eyes_Sad
