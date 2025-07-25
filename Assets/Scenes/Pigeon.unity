@@ -968,6 +968,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pigeon
       objectReference: {fileID: 0}
+    - target: {fileID: 5335460907300946471, guid: 1aa1701ab5a08493b8958753099e831a, type: 3}
+      propertyPath: animationData
+      value: 
+      objectReference: {fileID: 11400000, guid: fb0b4a08c8cd6494da9e586040d5545e, type: 2}
     - target: {fileID: 6280971696415985339, guid: 1aa1701ab5a08493b8958753099e831a, type: 3}
       propertyPath: m_Height
       value: 0

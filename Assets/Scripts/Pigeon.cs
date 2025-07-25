@@ -27,8 +27,7 @@ namespace DefaultNamespace
         public float personalityAggressiveness = 0.5f;
         
         [Header("Animation Control")]
-        public bool useRandomIdleAnimations = true;
-        public float idleAnimationChangeInterval = 3f;
+        [SerializeField] PigeonAnimationData animationData;
         
         [Header("Eating Settings")]
         [SerializeField] Vector3 beakOffset = new Vector3(0f, 0.2f, 0.4f); // Forward and up from center
@@ -60,51 +59,6 @@ namespace DefaultNamespace
         string currentAnimation = "";
         float lastIdleChangeTime;
         int currentIdleIndex;
-        
-        List<string> animationList = new List<string> 
-        {	"Attack",
-            "Bounce",
-            "Clicked",
-            "Death",
-            "Eat",
-            "Fear",
-            "Fly",
-            "Hit",
-            "Idle_A", "Idle_B", "Idle_C",
-            "Jump",
-            "Roll",
-            "Run",
-            "Sit",
-            "Spin/Splash",
-            "Swim",
-            "Walk"
-        };
-        
-        List<string> shapekeyList = new List<string>
-        {	"Eyes_Annoyed",
-            "Eyes_Blink",
-            "Eyes_Cry",
-            "Eyes_Dead",
-            "Eyes_Excited",
-            "Eyes_Happy",
-            "Eyes_LookDown",
-            "Eyes_LookIn",
-            "Eyes_LookOut",
-            "Eyes_LookUp",
-            "Eyes_Rabid",
-            "Eyes_Sad",
-            "Eyes_Shrink",
-            "Eyes_Sleep",
-            "Eyes_Spin",
-            "Eyes_Squint",
-            "Eyes_Trauma",
-            "Sweat_L",
-            "Sweat_R",
-            "Teardrop_L",
-            "Teardrop_R"
-        };
-        
-        List<string> idleAnimations = new List<string> { "Idle_A", "Idle_B", "Idle_C" };
         
         void Awake()
         {
@@ -159,6 +113,12 @@ namespace DefaultNamespace
 
         void Start()
         {
+            // Validate required components
+            if (animationData == null)
+            {
+                Debug.LogError($"PigeonAnimationData not assigned to {gameObject.name}! Please assign it in the inspector.");
+            }
+            
             // Find eating system
             eatingSystem = FindFirstObjectByType<PigeonEatingSystem>();
             if (eatingSystem == null)
@@ -488,8 +448,10 @@ namespace DefaultNamespace
         
         void PerformCompetitiveBehavior()
         {
+            if (animationData == null) return;
+            
             // Play aggressive animation and push others
-            SetAnimation("Attack");
+            SetAnimation(animationData.AttackAnimation);
             
             foreach (Pigeon pigeon in nearbyPigeons)
             {
@@ -523,6 +485,8 @@ namespace DefaultNamespace
         
         void StartEating()
         {
+            if (animationData == null) return;
+            
             ChangeState(PigeonState.Eating);
             isEating = true;
             eatStartTime = Time.time;
@@ -530,7 +494,7 @@ namespace DefaultNamespace
             // Face the food before eating
             FaceFood();
             
-            SetAnimation("Eat");
+            SetAnimation(animationData.EatAnimation);
             
             if (navAgent.enabled)
             {
@@ -643,6 +607,12 @@ namespace DefaultNamespace
         
         void HandleAnimation()
         {
+            if (animationData == null) 
+            {
+                Debug.LogWarning($"{gameObject.name}: PigeonAnimationData is null! Please assign it in the inspector.");
+                return;
+            }
+            
             string targetAnimation = "";
             bool isMoving = false;
             bool isRunning = false;
@@ -657,11 +627,11 @@ namespace DefaultNamespace
                 
                 if (isFlying || !isGrounded)
                 {
-                    targetAnimation = "Fly";
+                    targetAnimation = animationData.FlyAnimation;
                 }
                 else if (isMoving)
                 {
-                    targetAnimation = isRunning ? "Run" : "Walk";
+                    targetAnimation = isRunning ? animationData.RunAnimation : animationData.WalkAnimation;
                 }
             }
             else
@@ -671,28 +641,35 @@ namespace DefaultNamespace
                 {
                     isMoving = true;
                     isRunning = navAgent.velocity.magnitude > walkSpeed * 1.1f;
-                    targetAnimation = isRunning ? "Run" : "Walk";
+                    targetAnimation = isRunning ? animationData.RunAnimation : animationData.WalkAnimation;
                 }
                 
                 // Override with state-specific animations
                 if (currentState == PigeonState.Competing)
                 {
-                    targetAnimation = "Attack";
+                    targetAnimation = animationData.AttackAnimation;
                 }
                 else if (currentState == PigeonState.Eating)
                 {
-                    targetAnimation = "Eat";
+                    targetAnimation = animationData.EatAnimation;
                 }
             }
             
             if (!string.IsNullOrEmpty(targetAnimation) && targetAnimation != currentAnimation)
             {
+                Debug.Log($"{gameObject.name}: Playing animation '{targetAnimation}' (was '{currentAnimation}')");
                 SetAnimation(targetAnimation);
+            }
+            else if (string.IsNullOrEmpty(targetAnimation) && isMoving)
+            {
+                Debug.LogWarning($"{gameObject.name}: Should be moving but no target animation set! isMoving={isMoving}, isRunning={isRunning}");
             }
         }
         
         void HandleRandomIdleAnimations()
         {
+            if (animationData == null) return;
+            
             bool isMoving = false;
             bool isFlying = false;
             
@@ -707,12 +684,11 @@ namespace DefaultNamespace
                 isMoving = navAgent != null && navAgent.enabled && navAgent.velocity.magnitude > 0.1f;
             }
             
-            if (!isMoving && !isFlying && !isEating && useRandomIdleAnimations)
+            if (!isMoving && !isFlying && !isEating && animationData.UseRandomIdleAnimations)
             {
-                if (Time.time - lastIdleChangeTime >= idleAnimationChangeInterval)
+                if (Time.time - lastIdleChangeTime >= animationData.IdleAnimationChangeInterval)
                 {
-                    currentIdleIndex = UnityEngine.Random.Range(0, idleAnimations.Count);
-                    SetAnimation(idleAnimations[currentIdleIndex]);
+                    SetAnimation(animationData.GetRandomIdleAnimation());
                     lastIdleChangeTime = Time.time;
                 }
             }
@@ -720,20 +696,37 @@ namespace DefaultNamespace
         
         void HandleDebugControls()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) SetAnimation("Eat");
-            if (Input.GetKeyDown(KeyCode.Alpha2)) SetAnimation("Attack");
-            if (Input.GetKeyDown(KeyCode.Alpha3)) SetAnimation("Jump");
-            if (Input.GetKeyDown(KeyCode.Alpha4)) SetAnimation("Sit");
-            if (Input.GetKeyDown(KeyCode.Alpha5)) SetAnimation("Fear");
+            if (animationData == null) return;
             
-            if (Input.GetKeyDown(KeyCode.B)) SetShapeKey("Eyes_Blink");
-            if (Input.GetKeyDown(KeyCode.H)) SetShapeKey("Eyes_Happy");
-            if (Input.GetKeyDown(KeyCode.S)) SetShapeKey("Eyes_Sad");
+            // Handle debug animation keys
+            foreach (var debugKey in animationData.DebugKeys)
+            {
+                if (Input.GetKeyDown(debugKey.keyCode))
+                {
+                    SetAnimation(debugKey.animationName);
+                }
+            }
+            
+            // Handle debug shape key keys
+            foreach (var debugShapeKey in animationData.DebugShapeKeys)
+            {
+                if (Input.GetKeyDown(debugShapeKey.keyCode))
+                {
+                    SetShapeKey(debugShapeKey.shapeKeyName);
+                }
+            }
         }
 
         void SetAnimation(string animationName)
         {
             if (animator == null || string.IsNullOrEmpty(animationName)) return;
+            
+            // Validate animation name if we have animation data
+            if (animationData != null && !animationData.IsValidAnimation(animationName))
+            {
+                Debug.LogWarning($"Animation '{animationName}' not found in PigeonAnimationData!");
+                return;
+            }
 
             if (animationName == "Spin/Splash")
             {
@@ -757,10 +750,16 @@ namespace DefaultNamespace
         
         void SetShapeKey(string shapeKeyName)
         {
-            if (animator != null && !string.IsNullOrEmpty(shapeKeyName))
+            if (animator == null || string.IsNullOrEmpty(shapeKeyName)) return;
+            
+            // Validate shape key name if we have animation data
+            if (animationData != null && !animationData.IsValidShapeKey(shapeKeyName))
             {
-                animator.Play(shapeKeyName);
+                Debug.LogWarning($"Shape key '{shapeKeyName}' not found in PigeonAnimationData!");
+                return;
             }
+            
+            animator.Play(shapeKeyName);
         }
         
         // Public methods for external control
@@ -786,8 +785,17 @@ namespace DefaultNamespace
         }
         public bool IsGrounded() => isGrounded;
         public string GetCurrentAnimation() => currentAnimation;
-        public List<string> GetAvailableAnimations() => new List<string>(animationList);
-        public List<string> GetAvailableShapeKeys() => new List<string>(shapekeyList);
+        public List<string> GetAvailableAnimations() 
+        {
+            if (animationData == null) return new List<string>();
+            return new List<string>(animationData.AllAnimations);
+        }
+        
+        public List<string> GetAvailableShapeKeys() 
+        {
+            if (animationData == null) return new List<string>();
+            return new List<string>(animationData.AllShapeKeys);
+        }
     }
     
     [System.Serializable]
