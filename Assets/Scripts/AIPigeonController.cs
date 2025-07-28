@@ -4,9 +4,10 @@ using UnityEngine;
 namespace DefaultNamespace
 {
     /// <summary>
-    /// Handles AI behavior and controls the pigeon through the PigeonMovement component
+    /// Handles AI behavior and controls the pigeon through the PigeonMovement component.
+    /// Requires NavMeshAgent component to be added manually in Inspector.
     /// </summary>
-    [RequireComponent(typeof(PigeonMovement), typeof(Pigeon))]
+    [RequireComponent(typeof(PigeonMovement), typeof(Pigeon), typeof(UnityEngine.AI.NavMeshAgent))]
     public class AIPigeonController : MonoBehaviour
     {
         [Header("AI Settings")]
@@ -42,9 +43,6 @@ namespace DefaultNamespace
         
         void Start()
         {
-            // Initialize movement for NavMesh
-            pigeonMovement.InitializeForNavMesh();
-            
             // Find eating system
             eatingSystem = FindFirstObjectByType<PigeonEatingSystem>();
             if (eatingSystem == null)
@@ -55,16 +53,8 @@ namespace DefaultNamespace
             // Get animation data
             animationData = GetAnimationDataFromPigeon();
             
-            // Apply personality traits first
+            // Apply personality traits and initialize AI
             ApplyPersonalityTraits();
-            
-            // Delay initial AI behavior to let NavMesh initialize properly
-            Invoke(nameof(InitializeAI), 0.1f);
-        }
-        
-        void InitializeAI()
-        {
-            // Initialize AI after NavMesh is ready
             SetRandomWanderTarget();
         }
         
@@ -330,6 +320,13 @@ namespace DefaultNamespace
             
             // Apply speeds to movement component
             pigeonMovement.SetMovementSpeeds(walkSpeed, runSpeed);
+            
+            // Also update the NavMeshAgent speed directly if it exists
+            var navAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (navAgent != null)
+            {
+                navAgent.speed = walkSpeed;
+            }
         }
         
         #endregion
