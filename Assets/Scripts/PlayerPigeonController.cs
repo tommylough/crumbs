@@ -3,9 +3,10 @@ using UnityEngine;
 namespace DefaultNamespace
 {
     /// <summary>
-    /// Handles player input and controls the pigeon through the PigeonMovement component
+    /// Handles player input and controls the pigeon through the PigeonMovement component.
+    /// Requires CharacterController component to be added manually in Inspector.
     /// </summary>
-    [RequireComponent(typeof(PigeonMovement), typeof(Pigeon))]
+    [RequireComponent(typeof(PigeonMovement), typeof(Pigeon), typeof(CharacterController))]
     public class PlayerPigeonController : MonoBehaviour
     {
         [Header("Input Settings")]
@@ -25,9 +26,6 @@ namespace DefaultNamespace
         
         void Start()
         {
-            // Initialize movement for character controller
-            pigeonMovement.InitializeForCharacterController();
-            
             // Get animation data from pigeon if available
             animationData = GetAnimationDataFromPigeon();
         }

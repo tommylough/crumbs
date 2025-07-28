@@ -251,6 +251,7 @@ GameObject:
   - component: {fileID: 5335460907300946471}
   - component: {fileID: 7303713618624829337}
   - component: {fileID: 1531899369013259533}
+  - component: {fileID: 862133966033040837}
   m_Layer: 0
   m_Name: Player Pigeon
   m_TagString: Untagged
@@ -395,6 +396,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   groundCheckDistance: 0.1
+--- !u!143 &862133966033040837
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &509999177448663333
 GameObject:
   m_ObjectHideFlags: 0

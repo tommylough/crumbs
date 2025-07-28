@@ -1149,6 +1149,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pigeon
       objectReference: {fileID: 0}
+    - target: {fileID: 862133966033040837, guid: 1aa1701ab5a08493b8958753099e831a, type: 3}
+      propertyPath: m_Height
+      value: 0.86
+      objectReference: {fileID: 0}
+    - target: {fileID: 862133966033040837, guid: 1aa1701ab5a08493b8958753099e831a, type: 3}
+      propertyPath: m_Radius
+      value: 0.34
+      objectReference: {fileID: 0}
+    - target: {fileID: 862133966033040837, guid: 1aa1701ab5a08493b8958753099e831a, type: 3}
+      propertyPath: m_Center.y
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

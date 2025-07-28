@@ -8,6 +8,8 @@ namespace DefaultNamespace
     /// Used by both PlayerPigeonController and AIPigeonController.
     /// 
     /// NOTE: PigeonAnimationData should be assigned to the Pigeon component, not this component.
+    /// For Player pigeons: Add CharacterController component manually.
+    /// For AI pigeons: Add NavMeshAgent component manually.
     /// </summary>
     [RequireComponent(typeof(PigeonEvents), typeof(Animator))]
     public class PigeonMovement : MonoBehaviour
@@ -67,8 +69,13 @@ namespace DefaultNamespace
         {
             pigeonEvents = GetComponent<PigeonEvents>();
             animator = GetComponent<Animator>();
+            
+            // Get existing components (these should be added in Inspector)
             characterController = GetComponent<CharacterController>();
             navAgent = GetComponent<NavMeshAgent>();
+            
+            // Determine movement mode based on which component exists
+            useCharacterController = characterController != null;
         }
         
         void Start()
@@ -103,92 +110,6 @@ namespace DefaultNamespace
         }
         
         #region Public Movement Interface
-        
-        /// <summary>
-        /// Initialize for character controller (player) movement
-        /// </summary>
-        public void InitializeForCharacterController()
-        {
-            useCharacterController = true;
-            
-            if (navAgent != null)
-                navAgent.enabled = false;
-            
-            if (characterController == null)
-                characterController = gameObject.AddComponent<CharacterController>();
-            
-            // Configure CharacterController so the bottom touches the ground
-            // The bottom of the capsule should be at transform.position.y
-            characterController.radius = 0.3f;
-            characterController.height = 0.8f;
-            characterController.center = new Vector3(0, characterController.height / 2, 0); // Center at half-height so bottom is at transform position
-            characterController.enabled = true;
-        }
-        
-        /// <summary>
-        /// Initialize for NavMesh (AI) movement
-        /// </summary>
-        public void InitializeForNavMesh()
-        {
-            useCharacterController = false;
-            
-            if (characterController != null)
-                characterController.enabled = false;
-            
-            // Store original position before adding NavMeshAgent
-            Vector3 originalPosition = transform.position;
-            
-            if (navAgent == null)
-                navAgent = gameObject.AddComponent<NavMeshAgent>();
-            
-            // Configure NavMeshAgent with default settings
-            navAgent.speed = walkSpeed;
-            navAgent.angularSpeed = rotationSpeed * 60f;
-            navAgent.acceleration = 8f;
-            navAgent.stoppingDistance = 0.5f;
-            navAgent.autoBraking = true;
-            navAgent.radius = 0.3f;
-            navAgent.height = 0.8f;
-            navAgent.baseOffset = 0f; // Start with default
-            navAgent.enabled = true;
-            
-            // Wait for NavMesh to be ready and then fix position
-            StartCoroutine(WaitForNavMeshReadyAndFixPosition(originalPosition));
-        }
-        
-        System.Collections.IEnumerator WaitForNavMeshReadyAndFixPosition(Vector3 originalPosition)
-        {
-            // Wait a frame for NavMesh to initialize
-            yield return null;
-            
-            // Ensure we're on the NavMesh
-            if (!navAgent.isOnNavMesh)
-            {
-                // Try to place on NavMesh
-                UnityEngine.AI.NavMeshHit hit;
-                if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
-                {
-                    navAgent.Warp(hit.position);
-                }
-                else
-                {
-                    Debug.LogWarning($"{gameObject.name}: Could not find NavMesh surface nearby. Make sure NavMesh is baked and pigeon is placed on walkable surface.");
-                }
-            }
-            
-            // Calculate how much the Y position changed and adjust baseOffset to compensate
-            float yOffset = transform.position.y - originalPosition.y;
-            if (Mathf.Abs(yOffset) > 0.01f) // Only adjust if there's a significant offset
-            {
-                navAgent.baseOffset = -yOffset; // Compensate for the position change
-                
-                // Warp to the corrected position
-                Vector3 correctedPosition = originalPosition;
-                correctedPosition.x = transform.position.x; // Keep X movement (NavMesh might have adjusted this)
-                correctedPosition.z = transform.position.z; // Keep Z movement (NavMesh might have adjusted this)
-                navAgent.Warp(correctedPosition);
-            }
-        }
         
         /// <summary>
         /// Move using character controller (for player)
@@ -230,7 +151,7 @@ namespace DefaultNamespace
         /// </summary>
         public void SetAITarget(Vector3 targetPosition)
         {
-            if (useCharacterController || navAgent == null || !navAgent.enabled || !navAgent.isOnNavMesh) 
+            if (useCharacterController || navAgent == null || !navAgent.enabled) 
                 return;
             
             navAgent.SetDestination(targetPosition);
@@ -459,7 +380,7 @@ namespace DefaultNamespace
             {
                 // Character controller movement state is set in MoveWithCharacterController
             }
-            else if (navAgent != null && navAgent.enabled && navAgent.isOnNavMesh)
+            else if (navAgent != null && navAgent.enabled)
             {
                 // Update state based on NavMeshAgent
                 float velocityMagnitude = navAgent.velocity.magnitude;
@@ -492,6 +413,7 @@ namespace DefaultNamespace
             walkSpeed = newWalkSpeed;
             runSpeed = newRunSpeed;
             
+            // Update NavMeshAgent speed if we're using it
             if (!useCharacterController && navAgent != null)
             {
                 navAgent.speed = isRunning ? runSpeed : walkSpeed;
