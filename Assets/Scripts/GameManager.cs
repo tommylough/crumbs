@@ -15,30 +15,30 @@ namespace DefaultNamespace
         
         void Start()
         {
-            Debug.Log("GameManager Start() called");
+            //Debug.Log("GameManager Start() called");
             
             // Find eating system if not assigned
             if (eatingSystem == null)
             {
                 eatingSystem = FindFirstObjectByType<PigeonEatingSystem>();
-                Debug.Log("GameManager: Found eating system: " + (eatingSystem ? eatingSystem.name : "NULL"));
+                //Debug.Log("GameManager: Found eating system: " + (eatingSystem ? eatingSystem.name : "NULL"));
             }
             
             if (eatingSystem == null)
             {
-                Debug.LogError("GameManager: PigeonEatingSystem not found!");
+                //Debug.LogError("GameManager: PigeonEatingSystem not found!");
                 return;
             }
             
             // Start food spawning if requested
             if (startFoodSpawningOnStart)
             {
-                Debug.Log("GameManager: Auto-starting food spawning");
+                //Debug.Log("GameManager: Auto-starting food spawning");
                 StartFoodSpawning();
             }
             else
             {
-                Debug.Log("GameManager: Not auto-starting food spawning (startFoodSpawningOnStart = false)");
+                //Debug.Log("GameManager: Not auto-starting food spawning (startFoodSpawningOnStart = false)");
             }
         }
         
@@ -53,7 +53,7 @@ namespace DefaultNamespace
             // Manual spawn for testing
             if (Input.GetKeyDown(KeyCode.G))
             {
-                Debug.Log("Manual spawn triggered (G key)");
+                //Debug.Log("Manual spawn triggered (G key)");
                 if (eatingSystem != null)
                 {
                     eatingSystem.ManualSpawnFood();
@@ -63,7 +63,7 @@ namespace DefaultNamespace
             // Clear all food for testing
             if (Input.GetKeyDown(KeyCode.C))
             {
-                Debug.Log("Clear all food triggered (C key)");
+                //Debug.Log("Clear all food triggered (C key)");
                 if (eatingSystem != null)
                 {
                     eatingSystem.ClearAllFood();
@@ -77,7 +77,7 @@ namespace DefaultNamespace
             {
                 eatingSystem.StartFoodSpawning();
                 isFoodSpawningActive = true;
-                Debug.Log("GameManager: Food spawning started");
+                //Debug.Log("GameManager: Food spawning started");
             }
         }
         
@@ -87,7 +87,7 @@ namespace DefaultNamespace
             {
                 eatingSystem.StopFoodSpawning();
                 isFoodSpawningActive = false;
-                Debug.Log("GameManager: Food spawning stopped");
+                //Debug.Log("GameManager: Food spawning stopped");
             }
         }
         
@@ -108,7 +108,7 @@ namespace DefaultNamespace
             if (eatingSystem != null)
             {
                 eatingSystem.ClearAllFood();
-                Debug.Log("GameManager: All food cleared");
+                //Debug.Log("GameManager: All food cleared");
             }
         }
         

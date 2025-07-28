@@ -40,10 +40,10 @@ namespace DefaultNamespace
         
         void Start()
         {
-            Debug.Log("PigeonEatingSystem: Start() called");
+            //Debug.Log("PigeonEatingSystem: Start() called");
             FindAllTables();
             CheckGroundColliders();
-            Debug.Log("PigeonEatingSystem: Start() completed");
+            //Debug.Log("PigeonEatingSystem: Start() completed");
         }
         
         void CheckGroundColliders()
@@ -57,7 +57,7 @@ namespace DefaultNamespace
             
             if (groundObjects.Length == 0)
             {
-                Debug.LogWarning("PigeonEatingSystem: No ground colliders found! Food may fall through the world. Make sure your ground/terrain has colliders and is tagged 'Ground' or 'Terrain'.");
+                //Debug.LogWarning("PigeonEatingSystem: No ground colliders found! Food may fall through the world. Make sure your ground/terrain has colliders and is tagged 'Ground' or 'Terrain'.");
                 
                 // Check for any objects named "Ground" or "Terrain" that aren't tagged
                 GameObject[] allObjects = FindObjectsOfType<GameObject>();
@@ -65,24 +65,24 @@ namespace DefaultNamespace
                 {
                     if (obj.name.ToLower().Contains("ground") || obj.name.ToLower().Contains("terrain") || obj.name.ToLower().Contains("plane"))
                     {
-                        Debug.LogWarning($"Found object '{obj.name}' that might be ground but isn't tagged! Tag it as 'Ground' or 'Terrain'");
+                        //Debug.LogWarning($"Found object '{obj.name}' that might be ground but isn't tagged! Tag it as 'Ground' or 'Terrain'");
                         
                         // Check if it has a collider
                         Collider col = obj.GetComponent<Collider>();
                         if (col == null)
                         {
-                            Debug.LogError($"Object '{obj.name}' has NO COLLIDER! Add a MeshCollider or BoxCollider component.");
+                            //Debug.LogError($"Object '{obj.name}' has NO COLLIDER! Add a MeshCollider or BoxCollider component.");
                         }
                         else if (col.isTrigger)
                         {
-                            Debug.LogError($"Object '{obj.name}' collider is set to TRIGGER! Uncheck 'Is Trigger' in the collider component.");
+                            //Debug.LogError($"Object '{obj.name}' collider is set to TRIGGER! Uncheck 'Is Trigger' in the collider component.");
                         }
                     }
                 }
             }
             else
             {
-                Debug.Log($"PigeonEatingSystem: Found {groundObjects.Length} ground objects");
+                //Debug.Log($"PigeonEatingSystem: Found {groundObjects.Length} ground objects");
                 
                 // Check each ground object has proper collider setup
                 foreach (GameObject ground in groundObjects)
@@ -90,15 +90,15 @@ namespace DefaultNamespace
                     Collider col = ground.GetComponent<Collider>();
                     if (col == null)
                     {
-                        Debug.LogError($"Ground object '{ground.name}' has NO COLLIDER! Add a collider component.");
+                        //Debug.LogError($"Ground object '{ground.name}' has NO COLLIDER! Add a collider component.");
                     }
                     else if (col.isTrigger)
                     {
-                        Debug.LogError($"Ground object '{ground.name}' collider is set to TRIGGER! Uncheck 'Is Trigger' for physics collision.");
+                        //Debug.LogError($"Ground object '{ground.name}' collider is set to TRIGGER! Uncheck 'Is Trigger' for physics collision.");
                     }
                     else
                     {
-                        Debug.Log($"Ground object '{ground.name}' has proper collider setup: {col.GetType().Name}");
+                        //Debug.Log($"Ground object '{ground.name}' has proper collider setup: {col.GetType().Name}");
                     }
                 }
             }
@@ -106,17 +106,17 @@ namespace DefaultNamespace
         
         public void StartFoodSpawning()
         {
-            Debug.Log($"StartFoodSpawning called: isSpawning={isSpawning}, spawnCoroutine={(spawnCoroutine != null ? "exists" : "null")}");
+            //Debug.Log($"StartFoodSpawning called: isSpawning={isSpawning}, spawnCoroutine={(spawnCoroutine != null ? "exists" : "null")}");
             
             if (!isSpawning)
             {
                 isSpawning = true;
                 spawnCoroutine = StartCoroutine(FoodSpawningCoroutine());
-                Debug.Log("PigeonEatingSystem: Food spawning started successfully");
+                //Debug.Log("PigeonEatingSystem: Food spawning started successfully");
             }
             else
             {
-                Debug.Log("PigeonEatingSystem: Food spawning already active");
+                //Debug.Log("PigeonEatingSystem: Food spawning already active");
             }
         }
         
@@ -130,7 +130,7 @@ namespace DefaultNamespace
                     StopCoroutine(spawnCoroutine);
                     spawnCoroutine = null;
                 }
-                Debug.Log("PigeonEatingSystem: Food spawning stopped");
+                //Debug.Log("PigeonEatingSystem: Food spawning stopped");
             }
         }
         
@@ -139,42 +139,42 @@ namespace DefaultNamespace
             activeTables.Clear();
             GameObject[] foundTables = GameObject.FindGameObjectsWithTag(tableTag);
             activeTables.AddRange(foundTables);
-            Debug.Log($"PigeonEatingSystem: Found {activeTables.Count} tables");
+            //Debug.Log($"PigeonEatingSystem: Found {activeTables.Count} tables");
         }
         
         IEnumerator FoodSpawningCoroutine()
         {
-            Debug.Log("FoodSpawningCoroutine started");
+            //Debug.Log("FoodSpawningCoroutine started");
             
             while (isSpawning)
             {
                 float waitTime = Random.Range(spawnIntervalMin, spawnIntervalMax);
-                Debug.Log($"Waiting {waitTime} seconds before next spawn attempt...");
+                //Debug.Log($"Waiting {waitTime} seconds before next spawn attempt...");
                 yield return new WaitForSeconds(waitTime);
                 
-                Debug.Log($"Spawn check: activeFoodItems.Count={activeFoodItems.Count}, maxFoodOnGround={maxFoodOnGround}, activeTables.Count={activeTables.Count}");
+                //Debug.Log($"Spawn check: activeFoodItems.Count={activeFoodItems.Count}, maxFoodOnGround={maxFoodOnGround}, activeTables.Count={activeTables.Count}");
                 
                 if (activeFoodItems.Count < maxFoodOnGround && activeTables.Count > 0)
                 {
-                    Debug.Log("Conditions met, calling SpawnFoodFromRandomTable()");
+                    //Debug.Log("Conditions met, calling SpawnFoodFromRandomTable()");
                     SpawnFoodFromRandomTable();
                 }
                 else
                 {
-                    Debug.Log("Spawn conditions not met - skipping spawn");
+                    //Debug.Log("Spawn conditions not met - skipping spawn");
                 }
             }
             
-            Debug.Log("FoodSpawningCoroutine ended");
+            //Debug.Log("FoodSpawningCoroutine ended");
         }
         
         void SpawnFoodFromRandomTable()
         {
-            Debug.Log("SpawnFoodFromRandomTable called");
+            //Debug.Log("SpawnFoodFromRandomTable called");
             
             if (activeTables.Count == 0 || foodPrefabs.Length == 0) 
             {
-                Debug.LogWarning("Cannot spawn food: activeTables=" + activeTables.Count + ", foodPrefabs.Length=" + foodPrefabs.Length);
+                //Debug.LogWarning("Cannot spawn food: activeTables=" + activeTables.Count + ", foodPrefabs.Length=" + foodPrefabs.Length);
                 return;
             }
             
@@ -185,12 +185,12 @@ namespace DefaultNamespace
             GameObject randomTable = activeTables[Random.Range(0, activeTables.Count)];
             GameObject randomFoodPrefab = GetRandomFoodPrefab();
             
-            Debug.Log("Selected table: " + (randomTable ? randomTable.name : "NULL"));
-            Debug.Log("Selected food prefab: " + (randomFoodPrefab ? randomFoodPrefab.name : "NULL"));
+            //Debug.Log("Selected table: " + (randomTable ? randomTable.name : "NULL"));
+            //Debug.Log("Selected food prefab: " + (randomFoodPrefab ? randomFoodPrefab.name : "NULL"));
             
             if (randomFoodPrefab == null) 
             {
-                Debug.LogWarning("GetRandomFoodPrefab returned null");
+                //Debug.LogWarning("GetRandomFoodPrefab returned null");
                 return;
             }
             
@@ -205,26 +205,26 @@ namespace DefaultNamespace
             if (tableRenderer != null)
             {
                 tableVisualTop = tableRenderer.bounds.max.y;
-                Debug.Log($"Table '{randomTable.name}' visual top (renderer): {tableVisualTop}");
+                //Debug.Log($"Table '{randomTable.name}' visual top (renderer): {tableVisualTop}");
             }
             else
             {
                 // Fallback: use transform Y + reasonable table height estimate
                 tableVisualTop = randomTable.transform.position.y + 1f;
-                Debug.Log($"Table '{randomTable.name}' using transform Y + 1f: {tableVisualTop}");
+                //Debug.Log($"Table '{randomTable.name}' using transform Y + 1f: {tableVisualTop}");
             }
             
             // Set Y position to visual top + dropHeight for reliable spawning
             spawnPosition.y = tableVisualTop + dropHeight;
             
-            Debug.Log($"Final spawn position: {spawnPosition} (visual top {tableVisualTop} + {dropHeight} dropHeight)");
+            //Debug.Log($"Final spawn position: {spawnPosition} (visual top {tableVisualTop} + {dropHeight} dropHeight)");
             
             // Safety check - make sure spawn position is reasonable
             if (spawnPosition.y > 50f || spawnPosition.y < 1f)
             {
-                Debug.LogWarning($"Suspicious spawn position: {spawnPosition}. Using safer position.");
+                //Debug.LogWarning($"Suspicious spawn position: {spawnPosition}. Using safer position.");
                 spawnPosition = randomTable.transform.position + Vector3.up * 3f; // 3 units above table center
-                Debug.Log($"Using safe spawn position: {spawnPosition}");
+                //Debug.Log($"Using safe spawn position: {spawnPosition}");
             }
             
             // Spawn the food
@@ -239,33 +239,33 @@ namespace DefaultNamespace
             // Play audio and effects
             PlayDropEffects(spawnPosition);
             
-            Debug.Log($"PigeonEatingSystem: Successfully spawned {randomFoodPrefab.name} from {randomTable.name} at {spawnPosition}");
+            //Debug.Log($"PigeonEatingSystem: Successfully spawned {randomFoodPrefab.name} from {randomTable.name} at {spawnPosition}");
         }
         
         GameObject GetRandomFoodPrefab()
         {
             List<GameObject> validPrefabs = new List<GameObject>();
             
-            Debug.Log($"Checking {foodPrefabs.Length} food prefabs:");
+            //Debug.Log($"Checking {foodPrefabs.Length} food prefabs:");
             for (int i = 0; i < foodPrefabs.Length; i++)
             {
-                Debug.Log($"  foodPrefabs[{i}]: {(foodPrefabs[i] ? foodPrefabs[i].name : "NULL")}");
+                //Debug.Log($"  foodPrefabs[{i}]: {(foodPrefabs[i] ? foodPrefabs[i].name : "NULL")}");
                 if (foodPrefabs[i] != null)
                 {
                     validPrefabs.Add(foodPrefabs[i]);
                 }
             }
             
-            Debug.Log($"Found {validPrefabs.Count} valid food prefabs");
+            //Debug.Log($"Found {validPrefabs.Count} valid food prefabs");
             
             if (validPrefabs.Count == 0) 
             {
-                Debug.LogError("No valid food prefabs found! Make sure to assign food prefabs in the inspector.");
+                //Debug.LogError("No valid food prefabs found! Make sure to assign food prefabs in the inspector.");
                 return null;
             }
             
             GameObject selected = validPrefabs[Random.Range(0, validPrefabs.Count)];
-            Debug.Log($"Selected food prefab: {selected.name}");
+            //Debug.Log($"Selected food prefab: {selected.name}");
             return selected;
         }
         
@@ -274,12 +274,12 @@ namespace DefaultNamespace
             Collider tableCollider = table.GetComponent<Collider>();
             Vector3 tableCenter = table.transform.position;
             
-            Debug.Log($"Table '{table.name}' position: {tableCenter}");
+            //Debug.Log($"Table '{table.name}' position: {tableCenter}");
             
             if (tableCollider != null)
             {
                 Bounds bounds = tableCollider.bounds;
-                Debug.Log($"Table bounds: min={bounds.min}, max={bounds.max}, center={bounds.center}");
+                //Debug.Log($"Table bounds: min={bounds.min}, max={bounds.max}, center={bounds.center}");
                 
                 // Pick a random edge (0=front, 1=back, 2=left, 3=right)
                 int edge = Random.Range(0, 4);
@@ -311,18 +311,18 @@ namespace DefaultNamespace
                 // Safety check - make sure Y position is above ground
                 if (position.y < 0.1f)
                 {
-                    Debug.LogWarning($"Table Y position too low ({position.y}), using table transform Y instead");
+                    //Debug.LogWarning($"Table Y position too low ({position.y}), using table transform Y instead");
                     position.y = tableCenter.y + 0.5f; // Use table center + offset
                 }
                 
-                Debug.Log($"Edge position before dropHeight: {position}");
+                //Debug.Log($"Edge position before dropHeight: {position}");
                 return position;
             }
             
             // Fallback if no collider - use table center with safe offset
             Vector3 randomOffset = Random.insideUnitCircle * tableEdgeOffset;
             Vector3 fallbackPos = tableCenter + new Vector3(randomOffset.x, 1f, randomOffset.y); // 1f above table center
-            Debug.Log($"Using fallback position: {fallbackPos}");
+            //Debug.Log($"Using fallback position: {fallbackPos}");
             return fallbackPos;
         }
         
@@ -346,7 +346,7 @@ namespace DefaultNamespace
             Collider[] existingColliders = food.GetComponents<Collider>();
             foreach (Collider existingCol in existingColliders)
             {
-                Debug.Log($"Removing existing {existingCol.GetType().Name} collider from food");
+                //Debug.Log($"Removing existing {existingCol.GetType().Name} collider from food");
                 DestroyImmediate(existingCol);
             }
             
@@ -374,9 +374,9 @@ namespace DefaultNamespace
             rb.AddForce(randomForce, ForceMode.Impulse);
             
             // Add collision debugging component (temporary)
-            food.AddComponent<FoodCollisionDebugger>();
+            //food.AddComponent<FoodCollisionDebugger>();
             
-            Debug.Log($"Food physics configured: mass={rb.mass}, gravity={rb.useGravity}, collider=SphereCollider, radius={sphereCol.radius}, isTrigger={sphereCol.isTrigger}");
+            //Debug.Log($"Food physics configured: mass={rb.mass}, gravity={rb.useGravity}, collider=SphereCollider, radius={sphereCol.radius}, isTrigger={sphereCol.isTrigger}");
         }
         
         PhysicsMaterial CreateBouncyMaterial()
@@ -460,7 +460,7 @@ namespace DefaultNamespace
         
         public void ManualSpawnFood()
         {
-            Debug.Log("Manual spawn food called");
+            //Debug.Log("Manual spawn food called");
             SpawnFoodFromRandomTable();
         }
         

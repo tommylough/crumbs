@@ -247,10 +247,12 @@ GameObject:
   - component: {fileID: 509999177018552414}
   - component: {fileID: 509999177018552411}
   - component: {fileID: 509999177018552413}
-  - component: {fileID: 8857142579054716642}
+  - component: {fileID: -3852694058634163304}
   - component: {fileID: -547214555756033814}
+  - component: {fileID: 7303713618624829337}
+  - component: {fileID: 5505861259195603716}
   m_Layer: 0
-  m_Name: Competitor
+  m_Name: AI Pigeon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -329,31 +331,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!143 &8857142579054716642
-CharacterController:
+--- !u!114 &-3852694058634163304
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 509999177018552415}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 0.7284485
-  m_Radius: 0.2009266
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.4513622, z: 0.06788787}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fba0466d922c4d12bffa77948839978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  personality: 4
+  detectionRadius: 5
+  personalityAggressiveness: 0.5
+  baseWalkSpeed: 2
+  baseRunSpeed: 5
+  currentState: 0
 --- !u!114 &-547214555756033814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -366,19 +361,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e86e445e93b74c6691f2ea6bcba8c527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPlayerControlled: 0
+  beakOffset: {x: 0, y: 0.2, z: 0.4}
+  beakEatingDistance: 0.8
+  eatDuration: 2
+  animationData: {fileID: 11400000, guid: fb0b4a08c8cd6494da9e586040d5545e, type: 2}
+--- !u!114 &7303713618624829337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 699d749dd90f14b9e870ea94408a8ba1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logEvents: 0
+--- !u!114 &5505861259195603716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509999177018552415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734f8290ce8934f2f9c0eef318a2e578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   walkSpeed: 2
   runSpeed: 5
   rotationSpeed: 10
   gravity: -9.81
-  runKey: 304
-  flyKey: 32
-  personality: 4
-  detectionRadius: 5
-  personalityAggressiveness: 0.5
-  useRandomIdleAnimations: 1
-  idleAnimationChangeInterval: 3
-  currentState: 0
+  jumpForce: 5
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  groundCheckDistance: 0.1
 --- !u!1 &509999177448663333
 GameObject:
   m_ObjectHideFlags: 0
